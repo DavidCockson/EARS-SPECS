@@ -10,4 +10,4 @@
 
 [STABLE] #Ubiquitous The system shall <log all authentication attempts>.
 
-[DRAFT] #Option-Driven Where <two-factor is enabled>, the system shall <require a one-time code>.
+[STABLE] #Option-Driven Where <two-factor is enabled>, the system shall <require a one-time code>.

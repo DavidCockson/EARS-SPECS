@@ -2,9 +2,14 @@
   "name": "ears-specs",
   "displayName": "EARS Specs",
   "description": "Draft, autocomplete, and auto-organise EARS requirements (.ears.md) into the 5 EARS archetypes.",
-  "version": "0.1.1",
-  "publisher": "dave",
+  "version": "0.2.0",
+  "publisher": "davidcockson",
   "license": "MIT",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#5b9bd5",
+    "theme": "light"
+  },
   "engines": {
     "vscode": "^1.75.0"
   },
@@ -16,13 +21,21 @@
   "keywords": [
     "EARS",
     "requirements",
+    "requirements engineering",
+    "systems engineering",
     "specification",
-    "spec-driven"
+    "spec-driven",
+    "ears syntax",
+    "markdown"
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/davidcockson-compliance/EARS-SPECS.git"
   },
+  "bugs": {
+    "url": "https://github.com/davidcockson-compliance/EARS-SPECS/issues"
+  },
+  "homepage": "https://github.com/davidcockson-compliance/EARS-SPECS#readme",
   "main": "./extension.js",
   "activationEvents": [
     "onStartupFinished"
