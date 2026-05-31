@@ -1,0 +1,32 @@
+{
+    "EARS Ubiquitous": {
+        "scope": "markdown",
+        "prefix": "e-ubiq",
+        "body": "The <${1:system}> shall <${2:response}>",
+        "description": "EARS Ubiquitous"
+    },
+    "EARS State-Driven": {
+        "scope": "markdown",
+        "prefix": "e-state",
+        "body": "While <${1:state}>, the <${2:system}> shall <${3:response}>",
+        "description": "EARS State-Driven"
+    },
+    "EARS Event-Driven": {
+        "scope": "markdown",
+        "prefix": "e-event",
+        "body": "When <${1:trigger}>, the <${2:system}> shall <${3:response}>",
+        "description": "EARS Event-Driven"
+    },
+    "EARS Option-Driven": {
+        "scope": "markdown",
+        "prefix": "e-opt",
+        "body": "Where <${1:feature}>, the <${2:system}> shall <${3:response}>",
+        "description": "EARS Option-Driven"
+    },
+    "EARS Unwanted": {
+        "scope": "markdown",
+        "prefix": "e-err",
+        "body": "If <${1:error}>, then the <${2:system}> shall <${3:response}>",
+        "description": "EARS Unwanted Behavior"
+    }
+}

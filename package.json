@@ -1,0 +1,107 @@
+{
+  "name": "ears-specs",
+  "displayName": "EARS Specs",
+  "description": "Draft, autocomplete, and auto-organise EARS requirements (.ears.md) into the 5 EARS archetypes.",
+  "version": "0.1.0",
+  "publisher": "dave",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "EARS",
+    "requirements",
+    "specification",
+    "spec-driven"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR-GITHUB-USERNAME/EARS-SPECS.git"
+  },
+  "main": "./extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "configurationDefaults": {
+      "files.associations": {
+        "*.ears.md": "markdown"
+      }
+    },
+    "snippets": [
+      {
+        "language": "markdown",
+        "path": "./snippets/ears.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "ears.organize",
+        "title": "EARS: Organize Document into 5 Types",
+        "icon": "$(sort-precedence)"
+      },
+      {
+        "command": "ears.newSpec",
+        "title": "EARS: New Spec File",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "ears.refreshOutline",
+        "title": "EARS: Refresh Outline",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "ears.goto",
+        "title": "EARS: Go to Requirement"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "earsExplorer",
+          "title": "EARS",
+          "icon": "media/ears.svg"
+        }
+      ]
+    },
+    "views": {
+      "earsExplorer": [
+        {
+          "id": "earsOutline",
+          "name": "Requirements",
+          "icon": "media/ears.svg"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "ears.organize",
+          "when": "view == earsOutline",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ears.newSpec",
+          "when": "view == earsOutline",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ears.refreshOutline",
+          "when": "view == earsOutline",
+          "group": "navigation@3"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "ears.goto",
+          "when": "false"
+        }
+      ]
+    }
+  }
+}

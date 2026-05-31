@@ -1,0 +1,37 @@
+{
+  "EARS Ubiquitous": {
+    "prefix": "e-ubiq",
+    "body": "The <${1:system}> shall <${2:response}>",
+    "description": "EARS Ubiquitous — an always-active requirement"
+  },
+  "EARS State-Driven": {
+    "prefix": "e-state",
+    "body": "While <${1:state}>, the <${2:system}> shall <${3:response}>",
+    "description": "EARS State-Driven — active during a state"
+  },
+  "EARS Event-Driven": {
+    "prefix": "e-event",
+    "body": "When <${1:trigger}>, the <${2:system}> shall <${3:response}>",
+    "description": "EARS Event-Driven — triggered by an event"
+  },
+  "EARS Option-Driven": {
+    "prefix": "e-opt",
+    "body": "Where <${1:feature}>, the <${2:system}> shall <${3:response}>",
+    "description": "EARS Option-Driven — active when a feature is present"
+  },
+  "EARS Unwanted Behaviour": {
+    "prefix": "e-err",
+    "body": "If <${1:unwanted trigger}>, then the <${2:system}> shall <${3:response}>",
+    "description": "EARS Unwanted — handling an undesired condition"
+  },
+  "EARS Draft tag": {
+    "prefix": "e-draft",
+    "body": "[DRAFT] ",
+    "description": "Mark a requirement as draft"
+  },
+  "EARS Stable tag": {
+    "prefix": "e-stable",
+    "body": "[STABLE] ",
+    "description": "Mark a requirement as stable/agreed"
+  }
+}

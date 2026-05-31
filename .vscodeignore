@@ -1,0 +1,7 @@
+.gitignore
+.git/**
+examples/**
+*.ears.md
+.vscode/**
+.gemini/**
+**/*.vsix
