@@ -7,7 +7,7 @@ A reusable VS Code extension for drafting **EARS** (Easy Approach to Requirement
 | Feature | What it does |
 |---------|--------------|
 | **Syntax coloring** | Bundled — colors `When/While/Where/If/then`, `The/shall`, `<variables>`, and `[DRAFT]`/`[STABLE]` badges in any `.ears.md` file. No third-party extension needed. |
-| **Snippets** | `e-ubiq`, `e-state`, `e-event`, `e-opt`, `e-err` (+ `e-draft`/`e-stable`). Type the prefix, press <kbd>Tab</kbd>, then Tab between the `<parts>`. |
+| **Snippets** | `e-ubiq`, `e-state`, `e-event`, `e-opt`, `e-err` (+ `e-draft`/`e-stable`). Type the prefix, press <kbd>Tab</kbd>, then Tab between the `<parts>`. (The extension enables snippet Tab-completion for markdown; otherwise press <kbd>Ctrl+Space</kbd> to pick from the list.) |
 | **Live Requirements tree** | Activity-bar panel that groups the open spec's requirements under their detected archetype. Click any line to jump to it. |
 | **EARS: Organize Document** | Rewrites the current file into 5 sorted `##` sections (STABLE before DRAFT). Run it when a draft is complete. |
 | **EARS: New Spec File** | Scaffolds a templated `.ears.md` in the current folder. |

@@ -2,7 +2,7 @@
   "name": "ears-specs",
   "displayName": "EARS Specs",
   "description": "Draft, autocomplete, and auto-organise EARS requirements (.ears.md) into the 5 EARS archetypes.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "dave",
   "license": "MIT",
   "engines": {
@@ -31,6 +31,9 @@
     "configurationDefaults": {
       "files.associations": {
         "*.ears.md": "markdown"
+      },
+      "[markdown]": {
+        "editor.tabCompletion": "onlySnippets"
       }
     },
     "snippets": [
