@@ -21,7 +21,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR-GITHUB-USERNAME/EARS-SPECS.git"
+    "url": "https://github.com/davidcockson-compliance/EARS-SPECS.git"
   },
   "main": "./extension.js",
   "activationEvents": [

@@ -1,5 +1,6 @@
 .gitignore
 .git/**
+.github/**
 examples/**
 *.ears.md
 .vscode/**

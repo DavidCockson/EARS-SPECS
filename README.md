@@ -27,7 +27,7 @@ Unwanted       If <unwanted trigger>, then the <system> shall <response>
 This repo **is** the extension. To use it on any machine:
 
 **Option A — quick test (no build):**
-1. `git clone https://github.com/YOUR-GITHUB-USERNAME/EARS-SPECS.git`
+1. `git clone https://github.com/davidcockson-compliance/EARS-SPECS.git`
 2. Open the folder in VS Code and press <kbd>F5</kbd> → an Extension Development Host window launches with EARS Specs active.
 
 **Option B — install for daily use (build a .vsix):**
