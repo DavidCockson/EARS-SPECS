@@ -1,139 +1,142 @@
 # EARS Specs 👂
 
-A friendly VS Code helper for writing **EARS** requirements — the clear, no-arguments way to write down what a system should do. It adds colours, autocomplete, and a sidebar that sorts your requirements for you.
+[![VS Marketplace](https://vsmarketplacebadges.dev/version-short/davidcockson.ears-specs.svg)](https://marketplace.visualstudio.com/items?itemName=davidcockson.ears-specs)
+[![Open VSX](https://img.shields.io/open-vsx/v/davidcockson/ears-specs?label=Open%20VSX&color=a60ee5)](https://open-vsx.org/extension/davidcockson/ears-specs)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Written so that **non-technical people can install and use it**. If you can copy a file and click a few buttons, you can use this.
+A VS Code extension for authoring **EARS** requirements — clear, testable specifications written in the *Easy Approach to Requirements Syntax*. It provides syntax highlighting, snippets for every EARS pattern, and a sidebar that classifies and organises requirements automatically.
+
+The aim is consistent, reviewable specifications with zero manual bookkeeping: write a requirement, and the extension recognises its type, colours its structure, and files it in the right place.
+
+![EARS Specs in action — a requirements document organised into the five EARS types, with syntax highlighting, STABLE/DRAFT status badges, and the auto-classifying sidebar](https://raw.githubusercontent.com/davidcockson-compliance/EARS-SPECS/main/media/screenshots/overview.png)
 
 ---
 
-## Part 1 — Install it (pick your computer)
+## Install
 
-You only do this **once**. There are two ways: the **clicking way** (easiest) and the **command way** (for terminal folks). Both work on Windows, Mac, and Linux.
+Install once from the Marketplace; it updates automatically thereafter. Supported on Windows, macOS and Linux.
 
-### Step 1 — Download the file
+**From inside VS Code**
 
-1. Go to the **Releases page**: <https://github.com/davidcockson-compliance/EARS-SPECS/releases>
-2. Under the latest version, click the file ending in **`.vsix`** (e.g. `ears-specs-0.1.1.vsix`) to download it. It'll land in your **Downloads** folder.
+1. Open the **Extensions** view — <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd> (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd> on macOS).
+2. Search for **EARS Specs** by **davidcockson** (the 👂 icon).
+3. Select **Install**.
 
-### Step 2 — Install the file
+**From the command line**
 
-**👉 The clicking way (recommended, same on every computer):**
+```bash
+code --install-extension davidcockson.ears-specs
+```
 
-1. Open **VS Code**.
-2. Click the **Extensions** icon on the left (it looks like 4 squares), or press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd> (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd> on Mac).
-3. Click the **`...`** menu at the top of that panel → choose **Install from VSIX…**
-4. Find the `.vsix` file you downloaded and select it.
+> VSCodium, Cursor and Gitpod resolve the same identifier via Open VSX — see [Other ways to install](#other-ways-to-install).
 
-**👉 The command way (terminal):** open a terminal and run **one** line:
+### Verify
 
-| Computer | Command |
-|----------|---------|
-| **Linux** | `code --install-extension ~/Downloads/ears-specs-0.1.1.vsix` |
-| **Mac** | `code --install-extension ~/Downloads/ears-specs-0.1.1.vsix` |
-| **Windows** (PowerShell) | `code --install-extension $HOME\Downloads\ears-specs-0.1.1.vsix` |
-
-> **Mac tip:** if it says `code: command not found`, open VS Code → press <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> → type `Shell Command: Install 'code' command in PATH` → press Enter, then try again.
-
-### Step 3 — Restart
-
-**Close VS Code completely and open it again.** Done — it's installed for good, in every window.
-
-### To check it worked
-
-Make a file whose name ends in **`.ears.md`** (for example `test.ears.md`), open it, and type:
+Create a file ending in `.ears.md`, open it, and enter:
 
 ```
 [DRAFT] When <user logs in>, the system shall <check the password>.
 ```
 
-You should see colours appear and an **ear icon** 👂 show up on the left toolbar. That's it!
+The keywords are highlighted and the 👂 EARS icon appears in the Activity Bar.
 
 ---
 
-## Part 2 — The commands (what you can do)
+## Using it
 
-### ✍️ Autocomplete shortcuts (snippets)
+### Snippets
 
-Type one of these and press <kbd>Tab</kbd>. It fills in the sentence template, and <kbd>Tab</kbd> again jumps you to the next `<blank>` to fill in.
+Type a prefix and press <kbd>Tab</kbd> to expand the pattern; press <kbd>Tab</kbd> again to move between the `<placeholders>`.
 
-| Type this | You get | EARS type |
-|-----------|---------|-----------|
-| `e-ubiq` + Tab | `The <system> shall <response>` | Always-on rule |
-| `e-state` + Tab | `While <state>, the <system> shall <response>` | During a state |
-| `e-event` + Tab | `When <trigger>, the <system> shall <response>` | When something happens |
-| `e-opt` + Tab | `Where <feature>, the <system> shall <response>` | If a feature is present |
-| `e-err` + Tab | `If <problem>, then the <system> shall <response>` | Handling problems |
-| `e-draft` + Tab | `[DRAFT] ` | Mark as still-being-decided |
-| `e-stable` + Tab | `[STABLE] ` | Mark as agreed/final |
+| Prefix | Expands to | EARS pattern |
+|--------|------------|--------------|
+| `e-ubiq` | `The <system> shall <response>` | Ubiquitous (always active) |
+| `e-state` | `While <state>, the <system> shall <response>` | State-driven |
+| `e-event` | `When <trigger>, the <system> shall <response>` | Event-driven |
+| `e-opt` | `Where <feature>, the <system> shall <response>` | Option-driven |
+| `e-err` | `If <problem>, then the <system> shall <response>` | Unwanted behaviour |
+| `e-draft` | `[DRAFT] ` | Mark as under discussion |
+| `e-stable` | `[STABLE] ` | Mark as agreed |
 
-### 👂 The sidebar (Requirements panel)
+> If <kbd>Tab</kbd> does not expand, press <kbd>Ctrl</kbd>+<kbd>Space</kbd> to select the snippet from the list.
 
-Click the **ear icon** on the left toolbar. It shows all the requirements in your file, **grouped by type automatically**. 
-- A **filled dot** = STABLE (agreed). A **hollow dot** = DRAFT (still deciding).
-- **Click any line** to jump straight to it in your file.
+### Requirements sidebar
 
-### 🎛️ The menu commands
+Open the **EARS** view from the Activity Bar (👂). It lists every requirement in the active file, grouped by EARS pattern. A filled marker indicates **STABLE** (agreed); a hollow marker indicates **DRAFT** (under discussion). Select any entry to jump to its line.
 
-Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> on Mac) to open the command menu, then type the name:
+### Commands
 
-| Command | What it does |
-|---------|--------------|
-| **EARS: Organize Document** | Tidies your file into neat sections, one per EARS type, with the agreed (STABLE) ones first. Run it when you're done drafting. |
-| **EARS: New Spec File** | Creates a fresh requirements file with examples ready to edit. *(You need a folder open first — File → Open Folder.)* |
-| **EARS: Refresh Outline** | Re-reads the sidebar, in case it looks out of date. |
+Open the Command Palette — <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> on macOS) — and run:
 
----
-
-## Part 3 — How it all works (the explanation)
-
-### What is EARS?
-
-**EARS** = *Easy Approach to Requirements Syntax*. It's a way of writing requirements so they're impossible to misread. Instead of a vague paragraph, every requirement is one short sentence in one of **5 shapes**:
-
-| # | Shape | Template | Example |
-|---|-------|----------|---------|
-| 1 | **Ubiquitous** (always true) | `The <system> shall <response>` | The system shall log all logins. |
-| 2 | **State-Driven** (during a state) | `While <state>, the <system> shall <response>` | While the session is active, the system shall refresh the token. |
-| 3 | **Event-Driven** (on an event) | `When <trigger>, the <system> shall <response>` | When the user clicks login, the system shall check the password. |
-| 4 | **Option-Driven** (if a feature exists) | `Where <feature>, the <system> shall <response>` | Where two-factor is enabled, the system shall require a code. |
-| 5 | **Unwanted** (handling problems) | `If <problem>, then the <system> shall <response>` | If login fails 3 times, then the system shall lock the account. |
-
-### How the extension helps
-
-- **`.ears.md` files** — Your requirements live in normal Markdown files whose names end in `.ears.md`. The extension switches on its features only for those files, so it never interferes with your other work.
-
-- **Colours (highlighting)** — As you type, the extension paints the important words: the trigger words (*When / While / Where / If / then*) in blue, the backbone words (*The / shall*) in white, your `<blanks>` in red, and the `[DRAFT]` / `[STABLE]` labels as coloured badges. This is done with VS Code "decorations" — it's built in, so you don't need any other extension.
-
-- **It sorts itself** — Here's the clever bit: the extension figures out which of the 5 types a line is **just from its first word**. A line starting with *When* is Event-Driven; *While* is State-Driven; *If… then* is Unwanted, and so on. That's why the sidebar can group everything automatically — **you never have to tag anything by hand.**
-
-- **The sidebar** reads your open file, classifies each line that way, and lists them under their type. **Organize Document** does the same but actually rewrites the file into tidy sections.
-
-- **Status badges** — Put `[DRAFT]` or `[STABLE]` at the start of a line to track whether a requirement is still being discussed or finalised. The sidebar shows this as hollow vs filled dots.
-
-### Why this is nice for "spec-driven" work
-
-You draft freely, the tool keeps everything organised and consistent, and at any moment you can glance at the sidebar to see what's agreed and what's still open. No spreadsheets, no manual sorting.
+| Command | Description |
+|---------|-------------|
+| **EARS: Organize Document** | Rewrites the file into one section per EARS pattern, STABLE before DRAFT. Run it once a draft is complete. |
+| **EARS: New Spec File** | Scaffolds a templated `.ears.md`. Requires an open folder (File → Open Folder). |
+| **EARS: Refresh Outline** | Rebuilds the sidebar if it falls out of sync. |
 
 ---
 
-## For developers (optional)
+## How it works
 
-Want to change the extension or build it yourself?
+### EARS in brief
+
+EARS — the *Easy Approach to Requirements Syntax* — constrains every requirement to one of five sentence patterns, removing the ambiguity of free-form prose. Each pattern is identified by its leading keyword:
+
+| # | Pattern | Template | Example |
+|---|---------|----------|---------|
+| 1 | **Ubiquitous** | `The <system> shall <response>` | The system shall log all logins. |
+| 2 | **State-driven** | `While <state>, the <system> shall <response>` | While the session is active, the system shall refresh the token. |
+| 3 | **Event-driven** | `When <trigger>, the <system> shall <response>` | When the user clicks login, the system shall check the password. |
+| 4 | **Option-driven** | `Where <feature>, the <system> shall <response>` | Where two-factor is enabled, the system shall require a code. |
+| 5 | **Unwanted behaviour** | `If <problem>, then the <system> shall <response>` | If login fails three times, then the system shall lock the account. |
+
+### What the extension adds
+
+- **Scoped to `.ears.md`** — features activate only for these files, so they never interfere with your other Markdown.
+- **Syntax highlighting** — keywords (*When / While / Where / If / then*), the backbone (*The / shall*), `<placeholders>`, and `[DRAFT]` / `[STABLE]` badges are coloured using VS Code decorations. No additional extension required.
+- **Automatic classification** — each requirement's pattern is inferred from its leading keyword, so the sidebar groups everything with no manual tagging.
+- **One-command organisation** — *Organize Document* rewrites the file into ordered sections by pattern and status.
+- **Status tracking** — `[DRAFT]` and `[STABLE]` markers record whether a requirement is still under discussion or agreed.
+
+The result is a spec-driven workflow: draft freely, and the extension keeps requirements classified, consistent and reviewable, with agreed and open items visible at a glance.
+
+---
+
+## Other ways to install
+
+The Marketplace install above suits most users. These are alternatives.
+
+### VSCodium, Cursor, Gitpod (Open VSX)
+
+These editors resolve extensions from the [Open VSX Registry](https://open-vsx.org/extension/davidcockson/ears-specs). Search for **EARS Specs** in the Extensions view, or run:
+
+```bash
+code --install-extension davidcockson.ears-specs
+```
+
+### Manual `.vsix` (offline or air-gapped)
+
+1. Download the latest **`.vsix`** from the [Releases page](https://github.com/davidcockson-compliance/EARS-SPECS/releases).
+2. In VS Code: **Extensions** view → **`...`** menu → **Install from VSIX…** → select the file.
+
+> **macOS:** if `code` reports `command not found`, run *Shell Command: Install 'code' command in PATH* from the Command Palette, then retry.
+
+### Build from source
 
 ```bash
 git clone https://github.com/davidcockson-compliance/EARS-SPECS.git
 cd EARS-SPECS
-code .          # open in VS Code, then press F5 to test it in a sandbox window
+code .          # press F5 to launch an Extension Development Host
 ```
 
-To build an installable file:
+Package an installable build:
 
 ```bash
 npm install -g @vscode/vsce
-vsce package    # creates ears-specs-x.y.z.vsix
+vsce package    # produces ears-specs-x.y.z.vsix
 ```
 
-Pushing a git tag like `v0.1.2` automatically builds the `.vsix` and publishes it as a GitHub Release (see `.github/workflows/release.yml`).
+Pushing a git tag such as `v0.2.1` builds the `.vsix` and publishes a GitHub Release automatically (see `.github/workflows/release.yml`).
 
 ## License
 
