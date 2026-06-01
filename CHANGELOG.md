@@ -2,6 +2,14 @@
 
 All notable changes to **EARS Specs** are documented here.
 
+## [0.2.1] — 2026-06-01
+
+Documentation and listing polish — no functional changes.
+
+- Rewrote the README so the one-click **Marketplace** install leads; manual `.vsix`, Open VSX and build-from-source methods moved to a secondary section.
+- Added a screenshot and replaced the retired VS Marketplace status badges with working ones.
+- Neutralised the README tone for a general engineering audience.
+
 ## [0.2.0] — 2026-05-31
 
 First public release.

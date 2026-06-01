@@ -2,7 +2,7 @@
   "name": "ears-specs",
   "displayName": "EARS Specs",
   "description": "Draft, autocomplete, and auto-organise EARS requirements (.ears.md) into the 5 EARS archetypes.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "davidcockson",
   "license": "MIT",
   "icon": "media/icon.png",

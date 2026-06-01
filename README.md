@@ -136,7 +136,7 @@ npm install -g @vscode/vsce
 vsce package    # produces ears-specs-x.y.z.vsix
 ```
 
-Pushing a git tag such as `v0.2.1` builds the `.vsix` and publishes a GitHub Release automatically (see `.github/workflows/release.yml`).
+Pushing a git tag such as `v0.2.2` builds the `.vsix` and publishes a GitHub Release automatically (see `.github/workflows/release.yml`).
 
 ## License
 
