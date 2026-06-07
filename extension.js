@@ -203,11 +203,11 @@ const TEMPLATE = `# <Project> Requirements
 > Status legend: [DRAFT] = under discussion · [STABLE] = agreed
 > Tip: type e-ubiq / e-state / e-event / e-opt / e-err then Tab. Run "EARS: Organize Document" when done.
 
-[DRAFT] The system shall <log all authentication attempts>.
-[DRAFT] While <the session is active>, the system shall <refresh the token every 5 minutes>.
-[DRAFT] When <the user clicks login>, the system shall <authenticate the credentials>.
-[DRAFT] Where <two-factor is enabled>, the system shall <require a one-time code>.
-[DRAFT] If <login fails three times>, then the system shall <lock the account>.
+[DRAFT] The <system> shall <response>.
+[DRAFT] While <state>, the <system> shall <response>.
+[DRAFT] When <trigger>, the <system> shall <response>.
+[DRAFT] Where <feature>, the <system> shall <response>.
+[DRAFT] If <problem>, then the <system> shall <response>.
 `;
 
 async function newSpec() {

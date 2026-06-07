@@ -21,7 +21,7 @@
   },
   "EARS Unwanted Behaviour": {
     "prefix": "e-err",
-    "body": "If <${1:unwanted trigger}>, then the <${2:system}> shall <${3:response}>",
+    "body": "If <${1:problem}>, then the <${2:system}> shall <${3:response}>",
     "description": "EARS Unwanted — handling an undesired condition"
   },
   "EARS Draft tag": {

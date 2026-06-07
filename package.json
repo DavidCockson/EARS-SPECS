@@ -37,6 +37,9 @@
   },
   "homepage": "https://github.com/davidcockson-compliance/EARS-SPECS#readme",
   "main": "./extension.js",
+  "scripts": {
+    "test": "node ./test/runTest.js"
+  },
   "activationEvents": [
     "onStartupFinished"
   ],
@@ -119,5 +122,10 @@
         }
       ]
     }
+  },
+  "devDependencies": {
+    "@vscode/test-electron": "^2.5.2",
+    "glob": "^13.0.6",
+    "mocha": "^11.7.6"
   }
 }
