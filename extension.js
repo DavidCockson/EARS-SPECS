@@ -4,61 +4,10 @@
 // an "Organize Document" command, and a "New Spec" scaffolder.
 
 const vscode = require('vscode');
+const { TYPES, isSpecFileName, parseSpec, organize } = require('./src/ears');
 
-// The 5 EARS archetypes, in canonical order, plus a catch-all bucket.
-const TYPES = [
-  { key: 'ubiquitous', label: 'Ubiquitous' },
-  { key: 'state', label: 'State-Driven' },
-  { key: 'event', label: 'Event-Driven' },
-  { key: 'option', label: 'Option-Driven' },
-  { key: 'unwanted', label: 'Unwanted' },
-  { key: 'unclassified', label: 'Unclassified' }
-];
-
-const isEarsDoc = (doc) => !!doc && doc.fileName.endsWith('.ears.md');
-
-// ---------------------------------------------------------------------------
-// Classification — the heart of "organise themselves". The EARS type is fully
-// determined by the opening keyword, so no manual tags are required.
-// ---------------------------------------------------------------------------
-function classify(rawLine) {
-  // Markdown headings (## Foo) are structure, not requirements.
-  if (/^\s*#{1,6}\s/.test(rawLine)) return null;
-
-  // Strip an optional list marker, a [DRAFT]/[STABLE] status, and a #Archetype tag.
-  const text = rawLine
-    .replace(/^\s*[-*]\s+/, '')
-    .replace(/^\s*\[(DRAFT|STABLE)\]\s*/i, '')
-    .replace(/^\s*#[\w-]+\s*/, '')
-    .trim();
-
-  if (!text) return null; // blank line
-
-  if (/^if\b/i.test(text) && /\bthen\b/i.test(text)) return 'unwanted';
-  if (/^when\b/i.test(text)) return 'event';
-  if (/^while\b/i.test(text)) return 'state';
-  if (/^where\b/i.test(text)) return 'option';
-  if (/^the\b/i.test(text) && /\bshall\b/i.test(text)) return 'ubiquitous';
-  if (/\bshall\b/i.test(text)) return 'ubiquitous'; // lenient fallback
-  return 'unclassified';
-}
-
-function statusOf(rawLine) {
-  const m = rawLine.match(/\[(DRAFT|STABLE)\]/i);
-  return m ? m[1].toUpperCase() : null;
-}
-
-// Parse a document body into { line, text, type, status } requirement records.
-function parseRequirements(doc) {
-  const out = [];
-  for (let i = 0; i < doc.lineCount; i++) {
-    const raw = doc.lineAt(i).text;
-    const type = classify(raw);
-    if (!type) continue;
-    out.push({ line: i, text: raw.trim(), type, status: statusOf(raw) });
-  }
-  return out;
-}
+const isEarsDoc = (doc) => !!doc && isSpecFileName(doc.fileName);
+const docLines = (doc) => doc.getText().split(/\r?\n/);
 
 // ---------------------------------------------------------------------------
 // Syntax coloring via editor decorations (self-contained; no third-party ext).
@@ -120,7 +69,7 @@ class EarsOutlineProvider {
       hint.iconPath = new vscode.ThemeIcon('info');
       return element ? [] : [hint];
     }
-    const reqs = parseRequirements(doc);
+    const reqs = parseSpec(docLines(doc)).requirements;
 
     if (!element) {
       // Root: one node per archetype that actually has requirements.
@@ -143,9 +92,8 @@ class EarsOutlineProvider {
     return reqs
       .filter((r) => r.type === element._group)
       .map((r) => {
-        const label = r.text.replace(/^\[(DRAFT|STABLE)\]\s*/i, '').replace(/^#[\w-]+\s*/, '');
         const node = new vscode.TreeItem(
-          label.length > 90 ? label.slice(0, 87) + '…' : label,
+          r.label.length > 90 ? r.label.slice(0, 87) + '…' : r.label,
           vscode.TreeItemCollapsibleState.None
         );
         node.description = r.status || '';
@@ -168,31 +116,27 @@ async function organizeDocument() {
     return;
   }
   const doc = ed.document;
+  const original = doc.getText();
+  const result = organize(original);
 
-  // Preserve the first H1 title if present.
-  let title = '# Requirements';
-  for (let i = 0; i < doc.lineCount; i++) {
-    if (/^#\s+\S/.test(doc.lineAt(i).text)) { title = doc.lineAt(i).text.trim(); break; }
+  if (!result.requirements) {
+    vscode.window.showInformationMessage('EARS: no requirements found to organise.');
+    return;
   }
-
-  const reqs = parseRequirements(doc);
-  const lines = [title, ''];
-  for (const ty of TYPES) {
-    const items = reqs.filter((r) => r.type === ty.key);
-    if (!items.length) continue;
-    // STABLE first, then DRAFT, then untagged — keeps "done" work at the top.
-    const rank = (s) => (s === 'STABLE' ? 0 : s === 'DRAFT' ? 1 : 2);
-    items.sort((a, b) => rank(a.status) - rank(b.status));
-    lines.push(`## ${ty.label}`, '');
-    for (const r of items) lines.push(r.text);
-    lines.push('');
+  if (result.text === original) {
+    vscode.window.showInformationMessage('EARS: document is already organised.');
+    return;
   }
 
   const edit = new vscode.WorkspaceEdit();
-  const fullRange = new vscode.Range(0, 0, doc.lineCount, 0);
-  edit.replace(doc.uri, fullRange, lines.join('\n').replace(/\n+$/, '\n'));
-  await vscode.workspace.applyEdit(edit);
-  vscode.window.showInformationMessage(`EARS: organised ${reqs.length} requirement(s) into ${new Set(reqs.map(r => r.type)).size} section(s).`);
+  edit.replace(doc.uri, new vscode.Range(doc.positionAt(0), doc.positionAt(original.length)), result.text);
+  if (!(await vscode.workspace.applyEdit(edit))) {
+    vscode.window.showErrorMessage('EARS: could not apply the reorganised document. Is the file read-only?');
+    return;
+  }
+  vscode.window.showInformationMessage(
+    `EARS: organised ${result.requirements} requirement(s) into ${result.sections} section(s).`
+  );
 }
 
 // ---------------------------------------------------------------------------

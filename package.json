@@ -38,7 +38,9 @@
   "homepage": "https://github.com/davidcockson-compliance/EARS-SPECS#readme",
   "main": "./extension.js",
   "scripts": {
-    "test": "node ./test/runTest.js"
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "mocha --ui tdd test/unit",
+    "test:integration": "node ./test/runTest.js"
   },
   "activationEvents": [
     "onStartupFinished"
