@@ -11,32 +11,49 @@ const docLines = (doc) => doc.getText().split(/\r?\n/);
 
 // ---------------------------------------------------------------------------
 // Syntax coloring via editor decorations (self-contained; no third-party ext).
+// Each style has light and dark variants so it stays legible in every theme.
 // ---------------------------------------------------------------------------
-let decos;
-function buildDecorations() {
-  const t = (opts) => vscode.window.createTextEditorDecorationType(opts);
-  return {
-    keyword: { re: /\b(While|When|Where|If|then)\b/gi, deco: t({ color: '#66b3ff', fontWeight: 'bold' }) },
-    core: { re: /\b(The|shall)\b/gi, deco: t({ color: '#f8f9fa', fontWeight: 'bold' }) },
-    variable: { re: /<[^<>\r\n]+>/g, deco: t({ color: '#ff6b6b', fontStyle: 'italic' }) },
-    draft: { re: /\[DRAFT\]/g, deco: t({ backgroundColor: '#4a3512', color: '#fcc419', borderRadius: '4px' }) },
-    stable: { re: /\[STABLE\]/g, deco: t({ backgroundColor: '#1e4620', color: '#51cf66', borderRadius: '4px' }) }
-  };
+const HIGHLIGHTS = [
+  {
+    re: /\b(?:While|When|Where|If|then)\b/gi,
+    style: { fontWeight: 'bold', light: { color: '#0b62c4' }, dark: { color: '#66b3ff' } }
+  },
+  // The backbone keeps the theme's own foreground colour; bold alone marks it.
+  { re: /\b(?:The|shall)\b/gi, style: { fontWeight: 'bold' } },
+  {
+    re: /<[^<>\r\n]+>/g,
+    style: { fontStyle: 'italic', light: { color: '#c92a2a' }, dark: { color: '#ff6b6b' } }
+  },
+  {
+    re: /\[DRAFT\]/gi,
+    style: {
+      borderRadius: '4px',
+      light: { backgroundColor: '#fff3bf', color: '#8a5a00' },
+      dark: { backgroundColor: '#4a3512', color: '#fcc419' }
+    }
+  },
+  {
+    re: /\[STABLE\]/gi,
+    style: {
+      borderRadius: '4px',
+      light: { backgroundColor: '#d3f9d8', color: '#1e6b2a' },
+      dark: { backgroundColor: '#1e4620', color: '#51cf66' }
+    }
+  }
+];
+
+function createHighlighters() {
+  return HIGHLIGHTS.map(({ re, style }) => ({ re, deco: vscode.window.createTextEditorDecorationType(style) }));
 }
 
-function updateDecorations(editor) {
-  if (!editor || !isEarsDoc(editor.document)) return;
-  const text = editor.document.getText();
-  for (const key of Object.keys(decos)) {
-    const { re, deco } = decos[key];
+function decorate(editor, highlighters) {
+  const doc = editor.document;
+  if (!isEarsDoc(doc)) return;
+  const text = doc.getText();
+  for (const { re, deco } of highlighters) {
     const ranges = [];
-    let m;
-    re.lastIndex = 0;
-    while ((m = re.exec(text)) !== null) {
-      ranges.push(new vscode.Range(
-        editor.document.positionAt(m.index),
-        editor.document.positionAt(m.index + m[0].length)
-      ));
+    for (const m of text.matchAll(re)) {
+      ranges.push(new vscode.Range(doc.positionAt(m.index), doc.positionAt(m.index + m[0].length)));
     }
     editor.setDecorations(deco, ranges);
   }
@@ -202,17 +219,22 @@ async function newSpec() {
 
 // ---------------------------------------------------------------------------
 function activate(context) {
-  decos = buildDecorations();
+  const highlighters = createHighlighters();
+  context.subscriptions.push(...highlighters.map((h) => h.deco));
+  const decorateVisible = () => vscode.window.visibleTextEditors.forEach((ed) => decorate(ed, highlighters));
+  const decorateDocument = (doc) => vscode.window.visibleTextEditors
+    .filter((ed) => ed.document === doc)
+    .forEach((ed) => decorate(ed, highlighters));
+
   const provider = new EarsOutlineProvider();
   context.subscriptions.push(vscode.window.registerTreeDataProvider('earsOutline', provider));
 
   let timer;
-  const scheduleUpdate = () => {
-    const ed = vscode.window.activeTextEditor;
-    updateDecorations(ed);
+  const scheduleRefresh = () => {
     clearTimeout(timer);
     timer = setTimeout(() => provider.refresh(), 250);
   };
+  context.subscriptions.push({ dispose: () => clearTimeout(timer) });
 
   context.subscriptions.push(
     vscode.commands.registerCommand('ears.organize', organizeDocument),
@@ -225,15 +247,18 @@ function activate(context) {
       ed.selection = new vscode.Selection(pos, pos);
       ed.revealRange(new vscode.Range(pos, pos), vscode.TextEditorRevealType.InCenter);
     }),
-    vscode.window.onDidChangeActiveTextEditor(scheduleUpdate),
+    vscode.window.onDidChangeVisibleTextEditors(decorateVisible),
+    vscode.window.onDidChangeActiveTextEditor(scheduleRefresh),
     vscode.workspace.onDidChangeTextDocument((e) => {
-      const ed = vscode.window.activeTextEditor;
-      if (ed && e.document === ed.document) scheduleUpdate();
+      if (!isEarsDoc(e.document)) return;
+      decorateDocument(e.document);
+      scheduleRefresh();
     }),
     vscode.workspace.onDidSaveTextDocument(() => provider.refresh())
   );
 
-  scheduleUpdate();
+  decorateVisible();
+  provider.refresh();
 }
 
 function deactivate() {}
