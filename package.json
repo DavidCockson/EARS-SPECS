@@ -43,7 +43,8 @@
     "test:integration": "node ./test/runTest.js"
   },
   "activationEvents": [
-    "onStartupFinished"
+    "workspaceContains:**/*.ears.md",
+    "onLanguage:markdown"
   ],
   "contributes": {
     "configurationDefaults": {

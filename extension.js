@@ -64,62 +64,83 @@ function decorate(editor, highlighters) {
 // ---------------------------------------------------------------------------
 class EarsOutlineProvider {
   constructor() {
-    this._onDidChange = new vscode.EventEmitter();
-    this.onDidChangeTreeData = this._onDidChange.event;
+    this._onDidChangeTreeData = new vscode.EventEmitter();
+    this.onDidChangeTreeData = this._onDidChangeTreeData.event;
     this.uri = null;
+    this.requirements = null; // parsed once per refresh; null while no spec is open
   }
 
+  // Follow the active spec, but keep showing the last one while another editor has focus.
   refresh() {
     const ed = vscode.window.activeTextEditor;
     if (ed && isEarsDoc(ed.document)) this.uri = ed.document.uri;
-    this._onDidChange.fire();
+    const key = this.uri && this.uri.toString();
+    const doc = key && vscode.workspace.textDocuments.find((d) => d.uri.toString() === key);
+    this.requirements = doc ? parseSpec(docLines(doc)).requirements : null;
+    this._onDidChangeTreeData.fire();
   }
 
-  getTreeItem(item) { return item; }
+  dispose() {
+    this._onDidChangeTreeData.dispose();
+  }
+
+  getTreeItem(item) {
+    return item;
+  }
 
   getChildren(element) {
-    const doc = vscode.workspace.textDocuments.find(
-      (d) => this.uri && d.uri.toString() === this.uri.toString()
-    );
-    if (!doc) {
-      const hint = new vscode.TreeItem('Open a .ears.md file to see requirements');
-      hint.iconPath = new vscode.ThemeIcon('info');
-      return element ? [] : [hint];
-    }
-    const reqs = parseSpec(docLines(doc)).requirements;
-
-    if (!element) {
-      // Root: one node per archetype that actually has requirements.
-      return TYPES
-        .map((ty) => ({ ty, items: reqs.filter((r) => r.type === ty.key) }))
-        .filter((g) => g.items.length > 0)
-        .map((g) => {
-          const node = new vscode.TreeItem(
-            `${g.ty.label} (${g.items.length})`,
-            vscode.TreeItemCollapsibleState.Expanded
-          );
-          node.contextValue = 'earsGroup';
-          node._group = g.ty.key;
-          node.iconPath = new vscode.ThemeIcon('symbol-namespace');
-          return node;
-        });
-    }
-
-    // Children: requirement lines for the expanded archetype.
-    return reqs
-      .filter((r) => r.type === element._group)
+    if (!element) return this.rootItems();
+    return this.requirements
+      .filter((r) => r.type === element.groupKey)
       .map((r) => {
         const node = new vscode.TreeItem(
           r.label.length > 90 ? r.label.slice(0, 87) + '…' : r.label,
           vscode.TreeItemCollapsibleState.None
         );
         node.description = r.status || '';
+        node.tooltip = r.text;
         node.iconPath = new vscode.ThemeIcon(
           r.status === 'STABLE' ? 'pass-filled' : r.status === 'DRAFT' ? 'circle-large-outline' : 'circle-outline'
         );
         node.command = { command: 'ears.goto', title: 'Go to', arguments: [this.uri, r.line] };
         return node;
       });
+  }
+
+  // One node per archetype that actually has requirements.
+  rootItems() {
+    if (!this.requirements) return [hintItem('Open a .ears.md file to see requirements')];
+    const groups = TYPES
+      .map((ty) => ({ ty, count: this.requirements.filter((r) => r.type === ty.key).length }))
+      .filter((g) => g.count > 0)
+      .map(({ ty, count }) => {
+        const node = new vscode.TreeItem(`${ty.label} (${count})`, vscode.TreeItemCollapsibleState.Expanded);
+        node.id = `earsGroup:${ty.key}`; // stable id keeps the user's collapse state across refreshes
+        node.contextValue = 'earsGroup';
+        node.groupKey = ty.key;
+        node.iconPath = new vscode.ThemeIcon('symbol-namespace');
+        return node;
+      });
+    return groups.length ? groups : [hintItem('No requirements in this spec yet')];
+  }
+}
+
+function hintItem(message) {
+  const hint = new vscode.TreeItem(message);
+  hint.iconPath = new vscode.ThemeIcon('info');
+  return hint;
+}
+
+async function gotoRequirement(uri, line) {
+  try {
+    const doc = await vscode.workspace.openTextDocument(uri);
+    // The line may be stale if the file changed since the outline last refreshed.
+    const pos = doc.validatePosition(new vscode.Position(line, 0));
+    const range = new vscode.Range(pos, pos);
+    const ed = await vscode.window.showTextDocument(doc, { selection: range });
+    ed.revealRange(range, vscode.TextEditorRevealType.InCenter);
+  } catch (err) {
+    vscode.window.showErrorMessage(`EARS: could not open requirement: ${err.message}`);
   }
 }
 
@@ -227,7 +248,7 @@ function activate(context) {
     .forEach((ed) => decorate(ed, highlighters));
 
   const provider = new EarsOutlineProvider();
-  context.subscriptions.push(vscode.window.registerTreeDataProvider('earsOutline', provider));
+  context.subscriptions.push(provider, vscode.window.registerTreeDataProvider('earsOutline', provider));
 
   let timer;
   const scheduleRefresh = () => {
@@ -240,13 +261,7 @@ function activate(context) {
     vscode.commands.registerCommand('ears.organize', organizeDocument),
     vscode.commands.registerCommand('ears.newSpec', newSpec),
     vscode.commands.registerCommand('ears.refreshOutline', () => provider.refresh()),
-    vscode.commands.registerCommand('ears.goto', async (uri, line) => {
-      const doc = await vscode.workspace.openTextDocument(uri);
-      const ed = await vscode.window.showTextDocument(doc);
-      const pos = new vscode.Position(line, 0);
-      ed.selection = new vscode.Selection(pos, pos);
-      ed.revealRange(new vscode.Range(pos, pos), vscode.TextEditorRevealType.InCenter);
-    }),
+    vscode.commands.registerCommand('ears.goto', gotoRequirement),
     vscode.window.onDidChangeVisibleTextEditors(decorateVisible),
     vscode.window.onDidChangeActiveTextEditor(scheduleRefresh),
     vscode.workspace.onDidChangeTextDocument((e) => {
@@ -254,7 +269,9 @@ function activate(context) {
       decorateDocument(e.document);
       scheduleRefresh();
     }),
-    vscode.workspace.onDidSaveTextDocument(() => provider.refresh())
+    vscode.workspace.onDidCloseTextDocument((doc) => {
+      if (provider.uri && doc.uri.toString() === provider.uri.toString()) scheduleRefresh();
+    })
   );
 
   decorateVisible();
