@@ -12,7 +12,7 @@
 
 [STABLE] #Event-Driven When <token expires>, the system shall <force logout>.
 [DRAFT] #Event-Driven When <user clicks login>, the system shall <authenticate the credentials>.
-[DRAFT] #Option-Driven When <trigger>, the <system> shall <response>.
+[DRAFT] #Event-Driven When <user requests a password reset>, the system shall <email a single-use reset link>.
 
 ## Option-Driven
 
