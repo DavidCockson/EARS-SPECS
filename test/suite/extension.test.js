@@ -1,61 +1,72 @@
+// Integration tests: run inside a real VS Code instance via test/runTest.js, with a
+// temporary folder open as the workspace. Parsing details live in test/unit.
 const assert = require('assert');
-const vscode = require('vscode');
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
+const vscode = require('vscode');
+const { organize } = require('../../src/ears');
+
+const workspaceDir = () => vscode.workspace.workspaceFolders[0].uri.fsPath;
 
 suite('Extension Test Suite', () => {
-	vscode.window.showInformationMessage('Start all tests.');
-
 	test('Extension should activate', async () => {
 		const ext = vscode.extensions.getExtension('davidcockson.ears-specs');
-		if (ext) {
-			await ext.activate();
-			assert.ok(ext.isActive);
-		}
+		assert.ok(ext, 'extension davidcockson.ears-specs not found');
+		await ext.activate();
+		assert.ok(ext.isActive);
 	});
 
-	test('Organize command should classify and organize correctly', async () => {
-		const tmpFile = path.join(os.tmpdir(), 'test-organize.ears.md');
+	test('Organize command should rewrite the active spec', async () => {
+		const file = path.join(workspaceDir(), 'organize.ears.md');
 		const initialContent = `# Test Title
+> Intro note that must stay at the top.
+
 [DRAFT] The <system> shall <response>.
 [STABLE] When <trigger>, the <system> shall <response>.
 [DRAFT] While <state>, the <system> shall <response>.
 [DRAFT] Where <feature>, the <system> shall <response>.
 [STABLE] If <problem>, then the <system> shall <response>.
 > Tip: Just testing the unclassified stuff.`;
+		fs.writeFileSync(file, initialContent);
 
-		fs.writeFileSync(tmpFile, initialContent);
-
-		const uri = vscode.Uri.file(tmpFile);
-		const doc = await vscode.workspace.openTextDocument(uri);
+		const doc = await vscode.workspace.openTextDocument(file);
 		await vscode.window.showTextDocument(doc);
-		
-		await vscode.commands.executeCommand('ears.organize');
-		
-		const text = doc.getText();
-		
-		assert.ok(text.includes('## Ubiquitous'), 'Missing Ubiquitous section');
-		assert.ok(text.includes('## Event-Driven'), 'Missing Event-Driven section');
-		assert.ok(text.includes('## State-Driven'), 'Missing State-Driven section');
-		assert.ok(text.includes('## Option-Driven'), 'Missing Option-Driven section');
-		assert.ok(text.includes('## Unwanted'), 'Missing Unwanted section');
-		assert.ok(text.includes('## Unclassified'), 'Missing Unclassified section');
-		assert.ok(text.includes('> Tip: Just testing the unclassified stuff.'), 'Unclassified content lost');
-		
-		// Clean up (revert and close)
-		await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
-		if (fs.existsSync(tmpFile)) {
-			fs.unlinkSync(tmpFile);
+		try {
+			await vscode.commands.executeCommand('ears.organize');
+
+			const text = doc.getText();
+			assert.strictEqual(text, organize(initialContent).text);
+			assert.ok(text.startsWith('# Test Title\n> Intro note that must stay at the top.\n'), 'Intro block moved');
+			for (const section of ['Ubiquitous', 'State-Driven', 'Event-Driven', 'Option-Driven', 'Unwanted', 'Unclassified']) {
+				assert.ok(text.includes(`## ${section}`), `Missing ${section} section`);
+			}
+			assert.ok(text.includes('> Tip: Just testing the unclassified stuff.'), 'Unclassified content lost');
+		} finally {
+			// Revert so closing never blocks on a "save changes?" prompt.
+			await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
 		}
 	});
 
-	test('New Spec command should generate template', async () => {
-		// New Spec requires an open folder to place the file
-		// In tests, the workspace is often empty or depends on test launch arguments
-		// Instead of testing ears.newSpec directly which prompts for input, 
-		// we verify that the command is registered.
-		const commands = await vscode.commands.getCommands();
-		assert.ok(commands.includes('ears.newSpec'), 'ears.newSpec command not found');
+	test('New Spec should refuse to overwrite and create the template', async () => {
+		const existing = path.join(workspaceDir(), 'existing.ears.md');
+		fs.writeFileSync(existing, 'keep me\n');
+
+		const originalShowInputBox = vscode.window.showInputBox;
+		let validation;
+		vscode.window.showInputBox = async (options) => {
+			validation = await options.validateInput('existing.ears.md');
+			return 'fresh.ears.md';
+		};
+		try {
+			await vscode.commands.executeCommand('ears.newSpec');
+		} finally {
+			vscode.window.showInputBox = originalShowInputBox;
+		}
+
+		assert.match(validation, /already exists/);
+		assert.strictEqual(fs.readFileSync(existing, 'utf8'), 'keep me\n');
+		const created = fs.readFileSync(path.join(workspaceDir(), 'fresh.ears.md'), 'utf8');
+		assert.ok(created.includes('[DRAFT] When <trigger>, the <system> shall <response>.'), 'Template not written');
+		await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
 	});
 });
