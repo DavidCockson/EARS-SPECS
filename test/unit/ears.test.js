@@ -2,7 +2,7 @@
 // no VS Code instance required.
 
 const assert = require('assert');
-const { splitLine, classify, parseSpec, organize } = require('../../src/ears');
+const { splitLine, classify, parseSpec, organize, validateSpecName } = require('../../src/ears');
 
 suite('classify', () => {
 	const cases = [
@@ -138,5 +138,20 @@ suite('organize', () => {
 			organize('The system shall work.\n# Late Title\n').text,
 			'# Late Title\n\n## Ubiquitous\n\nThe system shall work.\n'
 		);
+	});
+});
+
+suite('validateSpecName', () => {
+	test('accepts a plain .ears.md file name', () => {
+		assert.strictEqual(validateSpecName('auth.ears.md'), null);
+		assert.strictEqual(validateSpecName('  auth.ears.md  '), null);
+	});
+
+	test('rejects other extensions, bare suffixes and paths', () => {
+		assert.match(validateSpecName('auth.md'), /must end with/);
+		assert.match(validateSpecName('.ears.md'), /must end with/);
+		assert.match(validateSpecName(''), /must end with/);
+		assert.match(validateSpecName('../auth.ears.md'), /not a path/);
+		assert.match(validateSpecName('specs\\auth.ears.md'), /not a path/);
 	});
 });

@@ -4,7 +4,7 @@
 // an "Organize Document" command, and a "New Spec" scaffolder.
 
 const vscode = require('vscode');
-const { TYPES, isSpecFileName, parseSpec, organize } = require('./src/ears');
+const { TYPES, isSpecFileName, parseSpec, organize, validateSpecName } = require('./src/ears');
 
 const isEarsDoc = (doc) => !!doc && isSpecFileName(doc.fileName);
 const docLines = (doc) => doc.getText().split(/\r?\n/);
@@ -154,19 +154,50 @@ const TEMPLATE = `# <Project> Requirements
 [DRAFT] If <problem>, then the <system> shall <response>.
 `;
 
+async function fileExists(uri) {
+  try {
+    await vscode.workspace.fs.stat(uri);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function newSpec() {
+  const folders = vscode.workspace.workspaceFolders;
+  if (!folders || !folders.length) {
+    vscode.window.showWarningMessage('EARS: open a folder first.');
+    return;
+  }
+  const folder = folders.length === 1
+    ? folders[0]
+    : await vscode.window.showWorkspaceFolderPick({ placeHolder: 'Folder for the new EARS spec' });
+  if (!folder) return;
+
+  const target = (name) => vscode.Uri.joinPath(folder.uri, name.trim());
+  const problemWith = async (name) =>
+    validateSpecName(name) || ((await fileExists(target(name))) ? `${name.trim()} already exists` : null);
+
   const name = await vscode.window.showInputBox({
     prompt: 'New EARS spec file name',
     value: 'requirements.ears.md',
-    validateInput: (v) => (v && v.endsWith('.ears.md') ? null : 'Name must end with .ears.md')
+    validateInput: problemWith
   });
   if (!name) return;
-  const folders = vscode.workspace.workspaceFolders;
-  if (!folders) { vscode.window.showWarningMessage('EARS: open a folder first.'); return; }
-  const uri = vscode.Uri.joinPath(folders[0].uri, name);
-  await vscode.workspace.fs.writeFile(uri, Buffer.from(TEMPLATE, 'utf8'));
-  const doc = await vscode.workspace.openTextDocument(uri);
-  await vscode.window.showTextDocument(doc);
+
+  // Re-check: the input box can be accepted before async validation settles.
+  const problem = await problemWith(name);
+  if (problem) {
+    vscode.window.showErrorMessage(`EARS: ${problem}.`);
+    return;
+  }
+  const uri = target(name);
+  try {
+    await vscode.workspace.fs.writeFile(uri, Buffer.from(TEMPLATE, 'utf8'));
+    await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(uri));
+  } catch (err) {
+    vscode.window.showErrorMessage(`EARS: could not create ${name.trim()}: ${err.message}`);
+  }
 }
 
 // ---------------------------------------------------------------------------

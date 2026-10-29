@@ -113,4 +113,14 @@ function organize(text) {
   return { text: out.join(eol) + eol, requirements: requirements.length, sections };
 }
 
-module.exports = { TYPES, SPEC_SUFFIX, isSpecFileName, splitLine, classify, parseSpec, organize };
+// Validation for the New Spec file-name prompt. Returns an error message or null.
+function validateSpecName(name) {
+  const trimmed = (name || '').trim();
+  if (!isSpecFileName(trimmed) || trimmed === SPEC_SUFFIX) return `Name must end with ${SPEC_SUFFIX}`;
+  if (/[\\/]/.test(trimmed)) return 'Enter a file name, not a path';
+  return null;
+}
+
+module.exports = {
+  TYPES, SPEC_SUFFIX, isSpecFileName, splitLine, classify, parseSpec, organize, validateSpecName
+};
