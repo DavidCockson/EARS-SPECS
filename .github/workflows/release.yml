@@ -1,4 +1,4 @@
-# Builds the .vsix and attaches it to a GitHub Release whenever a v* tag is pushed.
+# Tests, builds the .vsix and attaches it to a GitHub Release whenever a v* tag is pushed.
 # Usage:  git tag v0.1.0 && git push origin v0.1.0
 name: Release VSIX
 
@@ -19,6 +19,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Test
+        run: npm run test:unit && xvfb-run -a npm run test:integration
 
       - name: Install vsce
         run: npm install -g @vscode/vsce
