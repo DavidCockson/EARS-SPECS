@@ -2,7 +2,7 @@
   "name": "ears-specs",
   "displayName": "EARS Specs",
   "description": "Draft, autocomplete, and auto-organise EARS requirements (.ears.md) into the 5 EARS archetypes.",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "publisher": "davidcockson",
   "license": "MIT",
   "icon": "media/icon.png",
@@ -129,6 +129,6 @@
   "devDependencies": {
     "@vscode/test-electron": "^2.5.2",
     "glob": "^13.0.6",
-    "mocha": "^11.7.6"
+    "mocha": "^12.0.3"
   }
 }
