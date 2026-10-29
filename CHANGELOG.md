@@ -2,6 +2,25 @@
 
 All notable changes to **EARS Specs** are documented here.
 
+## [0.3.0] — Unreleased
+
+### Fixed
+- **New Spec** no longer silently overwrites an existing file; it also rejects paths and asks which folder to use in multi-root workspaces.
+- **Organize Document** keeps the intro block (title, notes) above the first requirement instead of moving it under *Unclassified*, preserves CRLF line endings, and reports when the edit cannot be applied.
+- Highlighting is legible on light themes (*The / shall* were near-white) and applies to every visible `.ears.md` editor, not just the active one.
+- `If …, the system shall …` (without *then*) is classified as Unwanted; status is read only from a leading `[DRAFT]` / `[STABLE]`; numbered list items are recognised.
+- Sidebar labels strip list markers, keep their collapse state across refreshes, and show the full line as a tooltip.
+
+### Changed
+- Activates only in workspaces containing `.ears.md` files or when Markdown opens, instead of on every startup.
+- Parsing logic moved to `src/ears.js` with a fast unit-test suite (`npm run test:unit`); CI now runs unit and integration tests on every push, pull request and release.
+- Test files and local settings are no longer included in the `.vsix`.
+
+## [0.2.2] — 2026-06-07
+
+- Aligned the New Spec template placeholders with the snippets.
+- Added an integration test suite.
+
 ## [0.2.1] — 2026-06-01
 
 Documentation and listing polish — no functional changes.

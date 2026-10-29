@@ -70,8 +70,8 @@ Open the Command Palette — <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (<kbd
 
 | Command | Description |
 |---------|-------------|
-| **EARS: Organize Document** | Rewrites the file into one section per EARS pattern, STABLE before DRAFT. Run it once a draft is complete. |
-| **EARS: New Spec File** | Scaffolds a templated `.ears.md`. Requires an open folder (File → Open Folder). |
+| **EARS: Organize Document** | Rewrites the file into one section per EARS pattern, STABLE before DRAFT. The title and any notes above the first requirement stay at the top; other headings are regenerated, and lines that match no pattern go under *Unclassified*. Run it once a draft is complete. |
+| **EARS: New Spec File** | Scaffolds a templated `.ears.md` in the open folder (File → Open Folder). Never overwrites an existing file. |
 | **EARS: Refresh Outline** | Rebuilds the sidebar if it falls out of sync. |
 
 ---
@@ -93,8 +93,8 @@ EARS — the *Easy Approach to Requirements Syntax* — constrains every require
 ### What the extension adds
 
 - **Scoped to `.ears.md`** — features activate only for these files, so they never interfere with your other Markdown.
-- **Syntax highlighting** — keywords (*When / While / Where / If / then*), the backbone (*The / shall*), `<placeholders>`, and `[DRAFT]` / `[STABLE]` badges are coloured using VS Code decorations. No additional extension required.
-- **Automatic classification** — each requirement's pattern is inferred from its leading keyword, so the sidebar groups everything with no manual tagging.
+- **Syntax highlighting** — keywords (*When / While / Where / If / then*), the backbone (*The / shall*), `<placeholders>`, and `[DRAFT]` / `[STABLE]` badges are coloured using VS Code decorations, with variants for light and dark themes. No additional extension required.
+- **Automatic classification** — each requirement's pattern is inferred from its leading keyword, so the sidebar groups everything with no manual tagging. Requirements can be plain lines or list items (`-`, `*`, `1.`).
 - **One-command organisation** — *Organize Document* rewrites the file into ordered sections by pattern and status.
 - **Status tracking** — `[DRAFT]` and `[STABLE]` markers record whether a requirement is still under discussion or agreed.
 
@@ -136,7 +136,15 @@ npm install -g @vscode/vsce
 vsce package    # produces ears-specs-x.y.z.vsix
 ```
 
-Pushing a git tag such as `v0.2.2` builds the `.vsix` and publishes a GitHub Release automatically (see `.github/workflows/release.yml`).
+Run the tests:
+
+```bash
+npm install
+npm run test:unit         # parser and Organize logic, no VS Code needed
+npm run test:integration  # launches VS Code and exercises the commands
+```
+
+Pushing a version tag such as `v0.3.0` runs the tests, builds the `.vsix` and publishes a GitHub Release automatically (see `.github/workflows/release.yml`).
 
 ## License
 
